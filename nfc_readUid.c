@@ -182,7 +182,26 @@ int main(int argc, const char *argv[]) {
             }
 
             const char* hexstr = hexToStr(nt.nti.nai.abtUid,nt.nti.nai.szUidLen);
-            printf("STRING UID : %s\n",hexstr);
+            
+            mysql_exec_sql(&mysql,"USE authaccess");
+            mysql_query(&mysql,"SELECT * FROM authUsers");
+            MYSQL_RES *result = mysql_store_result(&mysql);
+			if(!result) {
+				printf("ERROR RETRIEVING\n");
+
+			}
+			int num_f = mysql_num_fields(result);
+
+			MYSQL_ROW row;
+			MYSQL_FIELD *field;
+			int i;
+			while((row = mysql_fetch_row(result))) {
+		
+				//VERIFIER SI TOUT LE STR HEX CORRESPOND
+				//flag si ok ou pas
+			}
+
+
 			
 			
 
