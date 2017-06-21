@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <string.h>
+#include <my_global.h>
+#include <mysql.h>
 
 #include <nfc/nfc.h>
 #include <nfc/nfc-types.h>
@@ -38,7 +41,38 @@ print_hex(const uint8_t *pbtData, const size_t szLen)
 
 }
 
+uint8_t* hexstr_hex(char* str){
+ 	size_t i;
+ 	char *pos = str;
+ 	uint8_t hex[strlen(str)/2];
 
+ 	for(i=0;i<strlen(str);i++) {
+ 		sscanf(pos,"%2hhx",&hex[i]);
+ 		pos+=2;
+ 	}	
+ 	return hex;
+}
+
+const char* hexToStr(uint8_t* hex,size_t len) {
+	uint8_t* octet = (uint8_t*) hex;
+	int i=0;
+	char hexa[len];
+	char hexstring[20] = "";
+
+	while(i<len) {
+		sprintf(hexa,"%02x",octet[i]);
+		strcat(hexstring,hexa);
+		printf("%02x",octet[i++]);
+		fflush(stdout);
+	}
+	char *str = malloc(sizeof(char)*len+1);
+
+	hexstring[19] = '\0';
+	str = strdup(hexstring);
+	return str;
+}
+
+//TRANSMIT APDU COMMANDS AND READ APDU RESPONSES
 int CardTransmit(nfc_device *pnd,uint8_t *capdu,size_t capdulen,
 	uint8_t *rapdu,size_t *rapdulen) {
 	int res;
@@ -62,6 +96,10 @@ int CardTransmit(nfc_device *pnd,uint8_t *capdu,size_t capdulen,
 	}
 }
 
+
+
+
+//-----------------------------------------------
 int main(int argc, const char *argv[]) {
 	const char *acLibnfcVer;
 	size_t i;
@@ -128,54 +166,25 @@ int main(int argc, const char *argv[]) {
 			printf("EN recherche de target ...\n");
 			while(nfc_initiator_select_passive_target(pnd,nmMifare,NULL,0,&nt) <= 0);
 			printf("Target trouvé \n");
+            printf("NFC TAG(Norme ISO14443A :\n");
+            printf("\tATQA(SENS_RES): ");
+            print_hex(nt.nti.nai.abtAtqa,2);
+            printf("\tUID: ");
+            print_hex(nt.nti.nai.abtUid,nt.nti.nai.szUidLen);
 
-			uint8_t capdu[264];
-			size_t capdulen;
-			uint8_t rapdu[264];
-			size_t rapdulen;
+			
+            MYSQL mysql;
+            if(!mysql_init(&mysql)) exit(EXIT_FAILURE);
 
-			memcpy(capdu, "\xFF\xCA\x00\x00\x00",5);
-			capdulen = 12;
-			rapdulen = sizeof(rapdu);
-			if(CardTransmit(pnd,capdu,capdulen,rapdu, &rapdulen)<0) {
-				exit(EXIT_FAILURE);
-			}
-			if(rapdulen<2 || rapdu[rapdulen-2] != 0x90 || rapdu[rapdulen-1] != 0x00) 
-				exit(EXIT_FAILURE);
-			printf("SELECT OK\n");
+            if(!mysql_real_connect(&mysql,"127.0.0.1","root","test",NULL,3307,NULL,0)){
+            	printf("Database connection failed... aborting\n");
+            	exit(EXIT_FAILURE);
+            }
 
-			memcpy(capdu,"\x00\xa4\x00\x0c\x02\xe1\x03",7);
-			capdulen = 7;
-			rapdulen = sizeof(rapdu);
-			if(CardTransmit(pnd,capdu,capdulen,rapdu,&rapdulen)<0)
-				exit(EXIT_FAILURE);
-			if(rapdulen<2 || rapdu[rapdulen-2] != 0x90 || rapdu[rapdulen-1] != 0x00) {
-				capdu[3] = '\x00';
-				if(CardTransmit(pnd,capdu,capdulen,rapdu,&rapdulen)<0)
-					exit(EXIT_FAILURE);
-			}
-			printf("CAP CONT SELECTED");
-
-
-
-
-
-
-
-			memcpy(capdu,"\x00\xb0\x00\x00\x0f",5);
-			capdulen = 5;
-			rapdulen = sizeof(rapdu);
-			if(CardTransmit(pnd,capdu,capdulen,rapdu,&rapdulen)<0) {
-				exit(EXIT_FAILURE);
-			if(rapdulen<2 || rapdu[rapdulen-2] != 0x90 || rapdu[rapdulen-1] != 0x00) 
-				exit(EXIT_FAILURE);
-			printf("Cap container hearder :\n");
-			size_t szPos;
-			for(szPos=0;szPos<rapdulen-2; szPos++) {
-				printf("%02x ",rapdu[szPos]);
-			}
-			printf("\n");
-			}
+            const char* hexstr = hexToStr(nt.nti.nai.abtUid,nt.nti.nai.szUidLen);
+            printf("STRING UID : %s\n",hexstr);
+			
+			
 
 			if(verbose) {
 				if(nfc_device_get_information_about(pnd,&strinfo) >=0){
