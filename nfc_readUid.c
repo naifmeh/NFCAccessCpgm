@@ -40,7 +40,11 @@ print_hex(const uint8_t *pbtData, const size_t szLen)
   printf("\n");
 
 }
-
+int mysql_exec_sql(MYSQL *mysql,char *query) {
+	if(strlen(query)>0)
+		return mysql_real_query(mysql,query,strlen(query));
+	return -1;
+}
 uint8_t* hexstr_hex(char* str){
  	size_t i;
  	char *pos = str;
@@ -62,8 +66,9 @@ const char* hexToStr(uint8_t* hex,size_t len) {
 	while(i<len) {
 		sprintf(hexa,"%02x",octet[i]);
 		strcat(hexstring,hexa);
-		printf("%02x",octet[i++]);
-		fflush(stdout);
+		//printf("%02x",octet[i++]);
+		//fflush(stdout);
+		i++;
 	}
 	char *str = malloc(sizeof(char)*len+1);
 
@@ -194,14 +199,27 @@ int main(int argc, const char *argv[]) {
 
 			MYSQL_ROW row;
 			MYSQL_FIELD *field;
-			int i;
+			int i,flag=0,indice=-1,j=0;
 			while((row = mysql_fetch_row(result))) {
-		
-				//VERIFIER SI TOUT LE STR HEX CORRESPOND
-				//flag si ok ou pas
+	
+ 
+				for(j=0;j<strlen(row[1]);j++){
+					row[1][j] = tolower(row[1][j]);
+				}
+
+				if(strcmp((char*)row[1],hexstr) == 0){
+					flag=1;
+					indice=i;
+					printf("ACESS GRANTED %s %s \n",(char*)row[2],(char*) row[3]);
+				}
+
+			}
+			if(flag == 0) {
+				printf("ACCESS REFUSED \n");
+				exit(EXIT_FAILURE);
 			}
 
-
+			
 			
 			
 
@@ -215,7 +233,9 @@ int main(int argc, const char *argv[]) {
 		} else {
 			printf("Impo d\'ouvrir %s\n",connstring[i]);
 		}
-	}
+	
+	mysql_free_result(result);
+	mysql_close(&mysql);	
 	nfc_exit(context);
 	exit(EXIT_SUCCESS);
 

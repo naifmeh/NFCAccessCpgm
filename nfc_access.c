@@ -128,13 +128,14 @@ int main(int argc, const char *argv[]) {
 			printf("EN recherche de target ...\n");
 			while(nfc_initiator_select_passive_target(pnd,nmMifare,NULL,0,&nt) <= 0);
 			printf("Target trouvé \n");
-
+			printf("UID : ");
+			print_hex(nt.nti.nai.abtUid,nt.nti.nai.szUidLen);
 			uint8_t capdu[264];
 			size_t capdulen;
 			uint8_t rapdu[264];
 			size_t rapdulen;
 
-			memcpy(capdu, "\xFF\xCA\x00\x00\x00",5);
+			memcpy(capdu, "\xFF\xCA\x00\x00\x00\xF0\x39\x41\x48\x14\x81\x00",12);
 			capdulen = 12;
 			rapdulen = sizeof(rapdu);
 			if(CardTransmit(pnd,capdu,capdulen,rapdu, &rapdulen)<0) {

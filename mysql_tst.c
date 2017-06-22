@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctypes.h>
 
 int mysql_create_db(MYSQL *msql,char *query) {
 	char cdb[255] = "CREATE DATABASE ";
