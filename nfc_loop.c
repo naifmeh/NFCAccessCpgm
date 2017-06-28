@@ -122,11 +122,17 @@ int main(int argc,const char *argv[]) {
 						access_flag = 1;
 						addAuthUser(&mysql,pnd,&nt,uidStr,nmMifare);
 						break;
+					case -1:
+						access_flag=0;
+						break;
+					default:
+						access_flag=0;
+						break;
 
 				}
 				if(access_flag == 1) {
-					printf("ACCESS GRANTED\n\n");
-				}
+					printf("USER IN DATABASE\n\n");
+				} else printf("USER NOT IN DATABASE\n\n");
 				printf("PLEASE REMOVE CARD \n");
 				while(nfc_initiator_target_is_present(pnd,NULL) == 0);
 			}

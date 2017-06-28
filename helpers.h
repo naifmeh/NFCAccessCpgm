@@ -82,7 +82,7 @@ int handleUid(MYSQL *mysql,const char* uid) {
 	char statement[500];
 	snprintf(statement,500,"SELECT * FROM %s WHERE uid='%s'",TableName,uid);
 
-	if(mysql_query(mysql,statement) != 0) {
+	if(mysql_query(mysql,statement)) {
 		printf("NO SUCH UID...\n\n");
 		return response;
 	}
@@ -93,10 +93,12 @@ int handleUid(MYSQL *mysql,const char* uid) {
 		return -2;
 	}
 	int num_f = mysql_num_fields(result);
+	
 	MYSQL_ROW row;
 	row = mysql_fetch_row(result);
-
-	return atoi(row[RANK_COL]);
+	if(row)
+		return atoi(row[RANK_COL]);
+	return response;
 	mysql_free_result(result);
 
 
