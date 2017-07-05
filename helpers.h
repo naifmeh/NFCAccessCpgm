@@ -139,3 +139,64 @@ int addAuthUser(MYSQL *mysql,nfc_device *pnd,nfc_target *nt,
 	return 0;
 
 }
+
+//TRANSMIT APDU COMMANDS AND READ APDU RESPONSES
+int CardTransmit(nfc_device *pnd,uint8_t *capdu,size_t capdulen,
+	uint8_t *rapdu,size_t *rapdulen) {
+	int res;
+	size_t szPos;
+	printf("=> ");
+	for(szPos=0;szPos<capdulen;szPos++) {
+		printf("%02x ",capdu[szPos]);
+	}
+	printf("\n");
+	if((res = nfc_initiator_transceive_bytes(pnd,capdu,capdulen,rapdu,*rapdulen,500))
+		< 0) 
+		return -1;
+	else {
+		*rapdulen = (size_t) res;
+		printf("<= ");
+		for(szPos=0;szPos< *rapdulen;szPos++) {
+			printf("%02x ",rapdu[szPos]);
+		}
+		printf("\n");
+		return 0;
+	}
+}
+size_t static write_callback_func(void *buffer,
+                        size_t size,
+                        size_t nmemb,
+                        void *userp);
+char *do_web_request(char *url) {
+	CURL *curl_handle = NULL;
+	char *response = NULL;
+
+	curl_handle = curl_easy_init();
+	curl_easy_setopt(curl_handle,CURLOPT_URL,url);
+	curl_easy_setopt(curl_handle,CURLOPT_HTTPGET,1);
+
+	curl_easy_setopt(curl_handle,CURLOPT_FOLLOWLOCATION,1);
+	curl_easy_setopt(curl_handle,CURLOPT_VERBOSE,1);
+	
+
+	curl_easy_setopt(curl_handle,CURLOPT_WRITEDATA,&response);
+
+	curl_easy_perform(curl_handle);
+
+	curl_easy_cleanup(curl_handle);
+
+	return response;
+
+}
+size_t static write_callback_func(void *buffer,
+                        size_t size,
+                        size_t nmemb,
+                        void *userp)
+{
+    char **response_ptr =  (char**)userp;
+
+    /* assuming the response is a string */
+    *response_ptr = strndup(buffer, (size_t)(size *nmemb));
+
+}
+

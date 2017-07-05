@@ -118,6 +118,12 @@ int main(int argc,const char *argv[]) {
 
 						access_flag = 1;
 						break;
+					case 1:
+						access_flag = 1;
+						break;
+					case 2:
+						access_flag = 1;
+						break;
 					case 3:
 						access_flag = 1;
 						addAuthUser(&mysql,pnd,&nt,uidStr,nmMifare);
