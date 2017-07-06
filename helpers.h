@@ -167,7 +167,7 @@ size_t static write_callback_func(void *buffer,
                         size_t size,
                         size_t nmemb,
                         void *userp);
-char *do_web_request(char *url) {
+long do_web_request(char *url) {
 	CURL *curl_handle = NULL;
 	char *response = NULL;
 
@@ -179,13 +179,17 @@ char *do_web_request(char *url) {
 	curl_easy_setopt(curl_handle,CURLOPT_VERBOSE,1);
 	
 
-	curl_easy_setopt(curl_handle,CURLOPT_WRITEDATA,&response);
+	long http_code = 0;
+
 
 	curl_easy_perform(curl_handle);
-
+	curl_easy_getinfo (curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
+	if (http_code >= 200 && http_code < 300) {
+		printf("\n*****ACCESS GRANTED******\n");
+	} else printf("\n*/!\\/!\\/!\\**ACCESS REFUSED**/!\\/!\\/!\\");
 	curl_easy_cleanup(curl_handle);
 
-	return response;
+	return http_code;
 
 }
 size_t static write_callback_func(void *buffer,

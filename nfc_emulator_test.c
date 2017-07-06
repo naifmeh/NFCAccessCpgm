@@ -87,15 +87,17 @@ int main(int argc, const char *argv[]) {
 			.nbr = NBR_106
 	};
 
-	  printf("Polling for target...\n");
+	  
+while(1) {
+	printf("Polling for target...\n");
   while (nfc_initiator_select_passive_target(pnd, nmMifare, NULL, 0, &nt) <= 0);
   printf("Target detected!\n");
 		printf("SENDING SELECT APDU AID COMMAND : \n");
-while(1) {
 		uint8_t capdu[264];
 	  size_t capdulen;
 	  uint8_t rapdu[264];
 	  size_t rapdulen;
+	  uint8_t uid[10];
 	  // Select application
 	  memcpy(capdu, "\x00\xA4\x04\x00\x07\xF0\x01\x02\x03\x04\x05\x06", 12);
 	  capdulen=12;
@@ -106,14 +108,33 @@ while(1) {
   		printf("Target detected!\n");
 	  }
 	    
-	  if (rapdulen < 2 || rapdu[rapdulen-2] != 0x90 || rapdu[rapdulen-1] != 0x00) {
-	    printf("Polling for target...\n");
-  		while (nfc_initiator_select_passive_target(pnd, nmMifare, NULL, 0, &nt) <= 0);
- 		 printf("Target detected!\n");
+	  if (rapdulen  == 2 && rapdu[rapdulen-2] == 0x00 && rapdu[rapdulen-1] == 0x00) {
+	     printf("NOT EMULATED \n\n");
+	     printf("\n*/!\\/!\\/!\\**ACCESS REFUSED**/!\\/!\\/!\\\n\n");
+	     
+
 	}
+	else if (rapdulen == 264){
+		//-------------Handling the case where it may be a card
+	    char *uidStr = lowercase(hexToStr(nt.nti.nai.abtUid,nt.nti.nai.szUidLen));
+	   	printf("/!\\/!\\/!\\**PLEASE REMOVE CARD**/!\\/!\\/!\\\n\n");
+	   	while(nfc_initiator_target_is_present(pnd,NULL) == 0);
+	    if(uidStr != NULL && sizeof(uidStr) > 0) {
+	    	print_hex(nt.nti.nai.abtUid,nt.nti.nai.szUidLen);
+	    	
+	    	
+	  		printf("UID : %s\n",uidStr);
+	  		char url[500] = "http://127.0.0.1:8080/RestTest/webapi/nfcaccess/get/";
+	  		strcat(url,uidStr);
+
+	  		long content = 0;
+	  		content = do_web_request(url);
+	  		printf("\n\n%ld\n\n",content);
+	}
+}
 	  else 
 	  	{
-	  		uint8_t uid[10];
+	  		
 	  		int j=0;
 	  		for(j=0;j<rapdulen-2;j++) {
 	  			uid[j] = rapdu[j];
@@ -124,9 +145,9 @@ while(1) {
 	  		char url[500] = "http://127.0.0.1:8080/RestTest/webapi/nfcaccess/get/";
 	  		strcat(url,uidRetrieved);
 
-	  		char *content = NULL;
+	  		long content = 0;
 	  		content = do_web_request(url);
-	  		printf("\n\n%s\n\n",content);
+	  		printf("\n\n%ld\n\n",content);
 	  	}
 
 	  printf("Application selected!\n");
