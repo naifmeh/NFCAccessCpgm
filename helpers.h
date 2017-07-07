@@ -185,6 +185,9 @@ long do_web_request(char *url) {
 	curl_easy_perform(curl_handle);
 	curl_easy_getinfo (curl_handle, CURLINFO_RESPONSE_CODE, &http_code);
 	if (http_code >= 200 && http_code < 300) {
+		digitalWrite(0,0);
+		delay(50);
+		digitalWrite(0,1);
 		printf("\n*****ACCESS GRANTED******\n");
 	} else printf("\n*/!\\/!\\/!\\**ACCESS REFUSED**/!\\/!\\/!\\");
 	curl_easy_cleanup(curl_handle);

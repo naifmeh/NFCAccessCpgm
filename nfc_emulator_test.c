@@ -14,6 +14,7 @@
 #include <my_global.h>
 #include <mysql.h>
 
+#include <wiringPi.h>
 #include <nfc/nfc.h>
 #include <nfc/nfc-types.h>
 #include "../utils/nfc-utils.h"
@@ -35,6 +36,11 @@ int main(int argc, const char *argv[]) {
 	nfc_context *context;
 	nfc_target nt;
 	int arg=1;
+	while(wiringPiSetup() == -1) {
+		printf("ERROR WITH WIRINGPI \n");
+	}
+	pinMode(0,OUTPUT);
+	digitalWrite(0,1);
 	for(arg=1;arg<argc;arg++) {
 		if(0 == strcmp(argv[arg],"-h")) {
 			print_usage(argv);
@@ -124,7 +130,7 @@ while(1) {
 	    	
 	    	
 	  		printf("UID : %s\n",uidStr);
-	  		char url[500] = "http://127.0.0.1:8080/RestTest/webapi/nfcaccess/get/";
+	  		char url[500] = "http://192.168.1.13:8080/RestTest/webapi/nfcaccess/get/";
 	  		strcat(url,uidStr);
 
 	  		long content = 0;
@@ -142,7 +148,7 @@ while(1) {
 
 	  		char *uidRetrieved = hexToStr(uid,rapdulen-2);
 	  		printf("UID : %s\n",uidRetrieved);
-	  		char url[500] = "http://127.0.0.1:8080/RestTest/webapi/nfcaccess/get/";
+	  		char url[500] = "http://192.168.1.13:8080/RestTest/webapi/nfcaccess/get/";
 	  		strcat(url,uidRetrieved);
 
 	  		long content = 0;
