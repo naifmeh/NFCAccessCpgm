@@ -49,7 +49,7 @@ void init_db(MYSQL *mysql) {
 
 	for(i=0;i<strlen(str);i++) {
 		str1[i] = tolower(str1[i]);
-	
+
 	}
 	return str1;
 
@@ -93,7 +93,7 @@ int handleUid(MYSQL *mysql,const char* uid) {
 		return -2;
 	}
 	int num_f = mysql_num_fields(result);
-	
+
 	MYSQL_ROW row;
 	row = mysql_fetch_row(result);
 	if(row)
@@ -151,7 +151,7 @@ int CardTransmit(nfc_device *pnd,uint8_t *capdu,size_t capdulen,
 	}
 	printf("\n");
 	if((res = nfc_initiator_transceive_bytes(pnd,capdu,capdulen,rapdu,*rapdulen,500))
-		< 0) 
+		< 0)
 		return -1;
 	else {
 		*rapdulen = (size_t) res;
@@ -177,7 +177,7 @@ long do_web_request(char *url) {
 
 	curl_easy_setopt(curl_handle,CURLOPT_FOLLOWLOCATION,1);
 	curl_easy_setopt(curl_handle,CURLOPT_VERBOSE,1);
-	
+
 
 	long http_code = 0;
 
@@ -206,4 +206,3 @@ size_t static write_callback_func(void *buffer,
     *response_ptr = strndup(buffer, (size_t)(size *nmemb));
 
 }
-
