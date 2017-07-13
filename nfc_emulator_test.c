@@ -130,7 +130,7 @@ while(1) {
 	    	
 	    	
 	  		printf("UID : %s\n",uidStr);
-	  		char url[500] = "http://192.168.1.13:8080/RestTest/webapi/nfcaccess/get/";
+	  		char url[500] = "http://179.106.217.241:9191/RestTest/webapi/nfcaccess/get/";
 	  		strcat(url,uidStr);
 
 	  		long content = 0;
@@ -148,7 +148,7 @@ while(1) {
 
 	  		char *uidRetrieved = hexToStr(uid,rapdulen-2);
 	  		printf("UID : %s\n",uidRetrieved);
-	  		char url[500] = "http://192.168.1.13:8080/RestTest/webapi/nfcaccess/get/";
+	  		char url[500] = "http://179.106.217.241:9191/RestTest/webapi/nfcaccess/get/";
 	  		strcat(url,uidRetrieved);
 
 	  		long content = 0;
